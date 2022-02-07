@@ -1,10 +1,7 @@
 ---
-title: "My title"
-subtitle: "My subtitle if needed"
-author: 
-  - First author
-  - Another author
-thanks: "Code and data are available at: LINK."
+title: "Data from open data Toronto on Covid-19 and the amount of affected people in Toronto"
+author: "Swarnadeep Chattopadhyay"
+thanks: "https://github.com/WanteXecutioN/Sta304-Assignment-"
 date: "`r format(Sys.time(), '%d %B %Y')`"
 abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
 output:
@@ -18,6 +15,90 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
 library(palmerpenguins)
+```
+
+```{r, include=FALSE}
+library(opendatatoronto)
+library(dplyr)
+ 
+# get package
+package <- show_package("64b54586-6180-4485-83eb-81e8fae3b8fe")
+package
+ 
+# get all resources for this package
+resources <- list_package_resources("64b54586-6180-4485-83eb-81e8fae3b8fe")
+ 
+# identify datastore resources; by default, Toronto Open Data sets datastore resource format to CSV for non-geospatial and GeoJSON for geospatial resources
+datastore_resources <- filter(resources, tolower(format) %in% c('csv', 'geojson'))
+
+# load the first datastore resource as a sample
+covid_data <- filter(datastore_resources, row_number()==1) %>% get_resource()
+covid_data
+```
+
+```{r, echo=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(ggpubr)
+
+#removing the spaces in column headings
+names(covid_data) <- str_replace_all(names(covid_data), c(" " = "." , "," = "" ))
+
+#Top Toronto Neighbourhoods case count
+nbr_ct <- data.frame(sort(table(covid_data$Neighbourhood.Name), decreasing = TRUE))
+knitr::kable(head(nbr_ct, 10), "pipe", col.name =c("Neighbourhood Name", "Number of Cases"), align = c("l", "c"))
+
+knitr::kable(head(covid_data, 5), "pipe")
+
+#Create a copy of original data to add columns for Year and Year & Month
+c19_cpy <- covid_data
+c19_cpy$Yr <- format(as.Date(covid_data$Reported.Date), "%Y")
+c19_cpy$Yr_Mth <- format(as.Date(covid_data$Reported.Date), "%Y-%m")
+
+#Case Count by year
+ggplot(c19_cpy, aes(Yr, ..count..))+
+  geom_bar(aes(fill = Yr), alpha = 0.5)+
+  geom_text(aes(label = after_stat(count)), vjust = 0, stat = "count")+
+  labs(x = "Year", y = "Number of Cases", title = "YTD Numbers")
+
+#Case Count by Months
+Yr_20 <- c19_cpy %>% 
+          filter(Yr == "2020") %>% 
+          ggplot(aes(Yr_Mth, ..count..))+
+          geom_bar(aes(fill = Yr_Mth), alpha = 0.5)+
+          labs(x = "Months", y = "Number of Cases", title = "Monthly Numbers")+
+          theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+
+Yr_21 <- c19_cpy %>% 
+          filter(Yr == "2021") %>% 
+          ggplot(aes(Yr_Mth, ..count..))+
+          geom_bar(aes(fill = Yr_Mth), alpha = 0.5)+
+          labs(x = "Months", y = "Number of Cases", title = "Monthly Numbers")+
+          theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+
+Yr_22 <- c19_cpy %>% 
+          filter(Yr == "2022") %>% 
+          ggplot(aes(Yr_Mth, ..count..))+
+          geom_bar(aes(fill = Yr_Mth), alpha = 0.5)+
+          labs(x = "Months", y = "Number of Cases", title = "Monthly Numbers")+
+          theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+
+ggarrange(Yr_20, Yr_21, Yr_22,
+          labels = c("2020", "2021", "2022"),
+          nrow = 3)
+
+#Total case count by age groups
+ggplot(covid_data, aes(Age.Group, ..count..))+
+  geom_bar(aes(fill = Age.Group), alpha = 0.5)+
+  labs(x = "Age Groups", y = "Number of Cases", title = "Cases by Age groups")+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+
+#leading factors for covid infections
+ggplot(covid_data, aes(Source.of.Infection, ..count..))+
+  geom_bar(aes(fill = Source.of.Infection), alpha = 0.5)+
+  labs(x = "Sources", y = "Number of Cases", title = "Factors leading to cases")+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))+
+  coord_flip()
 ```
 
 # Introduction
