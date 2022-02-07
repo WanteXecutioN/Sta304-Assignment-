@@ -3,7 +3,7 @@ title: "Data from open data Toronto on Covid-19 and the amount of affected peopl
 author: "Swarnadeep Chattopadhyay"
 thanks: "https://github.com/WanteXecutioN/Sta304-Assignment-"
 date: "`r format(Sys.time(), '%d %B %Y')`"
-abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
+abstract: "This paper is regarding the Covid-19 cases in Toronto. The city of Toronto has been able to collect data on a daily basis and present it to the public for their use. This paper portrays figures such as graphs and tables in order for the readers to have a visual of the data. The results were rather astonishing as it provides an in depth visual of who or where the most cases occurred. The paper concludes by discussing the data and provides any biases that resulted from the data."
 output:
   bookdown::pdf_document2
 toc: FALSE
@@ -20,14 +20,14 @@ library(palmerpenguins)
 ```{r, include=FALSE}
 library(opendatatoronto)
 library(dplyr)
- 
+
 # get package
 package <- show_package("64b54586-6180-4485-83eb-81e8fae3b8fe")
 package
- 
+
 # get all resources for this package
 resources <- list_package_resources("64b54586-6180-4485-83eb-81e8fae3b8fe")
- 
+
 # identify datastore resources; by default, Toronto Open Data sets datastore resource format to CSV for non-geospatial and GeoJSON for geospatial resources
 datastore_resources <- filter(resources, tolower(format) %in% c('csv', 'geojson'))
 
@@ -105,7 +105,13 @@ ggplot(covid_data, aes(Source.of.Infection, ..count..))+
 
 You can and should cross-reference sections and sub-sections. For instance, Section \@ref(data). R Markdown automatically makes the sections lower case and adds a dash to spaces to generate labels, for instance, Section \@ref(first-discussion-point). 
 
+Covid-19 is a global pandemic which started back in 2019 and has been evolving since. In order to measure the people affected by this disease, the City of Toronto has launched a data set which provides how many people have been affected and other factors such as gender, age, neighborhood etc. This data can be retrieved from @citeopendatatoronto. With the help of @citeR, I was able to create visuals using @citeggplot2 which helps the readers understand the data better. 
 
+
+In this paper, we look closely at how Covid has affected in terms of age groups, neighborhoods and which year had the highest cases recorded. In terms of age group, 20-40 years saw the highest amount of cases recorded. In terms of neighborhoods,... saw the highest number of cases. As for which year, it was 2021. These will help us create an understanding of who has been affected the most or which area has been hit the hardest. In the next section, we will look at these data and discuss in detail as to what the visuals are telling us and what it could mean. 
+
+
+In terms of omitting any bias, I decided to include all the data to make sure the results were accurate. This however took long as loading the data was difficult at first but it eventually got faster as the more times I ran the code. In terms of bias in the data itself like age groups, neighborhoods and year, we will discuss what could have caused them. 
 
 # Data
 
