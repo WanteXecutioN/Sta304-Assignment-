@@ -1,0 +1,188 @@
+---
+title: "Data from open data Toronto on Covid-19 and the amount of affected people in Toronto"
+author: "Swarnadeep Chattopadhyay"
+thanks: "https://github.com/WanteXecutioN/Sta304-Assignment-"
+date: "Feb 6, 2022"
+abstract: "This paper is regarding the Covid-19 cases in Toronto. The city of Toronto has been able to collect data on a daily basis and present it to the public for their use. This paper portrays figures such as graphs and tables in order for the readers to have a visual of the data. The results were rather astonishing as it provides an in depth visual of who or where the most cases occurred. The paper concludes by discussing the data and provides any biases that resulted from the data."
+output:
+  bookdown::pdf_document2
+toc: FALSE
+bibliography: references.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(palmerpenguins)
+```
+
+```{r, include=FALSE}
+library(opendatatoronto)
+library(dplyr)
+
+# get package
+package <- show_package("64b54586-6180-4485-83eb-81e8fae3b8fe")
+package
+
+# get all resources for this package
+resources <- list_package_resources("64b54586-6180-4485-83eb-81e8fae3b8fe")
+
+# identify datastore resources; by default, Toronto Open Data sets datastore resource format to CSV for non-geospatial and GeoJSON for geospatial resources
+datastore_resources <- filter(resources, tolower(format) %in% c('csv', 'geojson'))
+
+# load the first datastore resource as a sample
+covid_data <- filter(datastore_resources, row_number()==1) %>% get_resource()
+covid_data
+```
+
+# Introduction
+
+Covid-19 is a global pandemic which started back in 2019 and has been evolving since. In order to measure the people affected by this disease, the City of Toronto has launched a data set which provides how many people have been affected and other factors such as gender, age, neighborhood etc. This data can be retrieved from @citeopendatatoronto. With the help of @citeR, I was able to create visuals using @citeggplot2 which helps the readers understand the data better. 
+
+In this paper, we look closely at how Covid has affected in terms of age groups, neighborhoods and which year had the highest cases recorded. In terms of age group, 20-40 years saw the highest amount of cases recorded. In terms of neighborhoods, Woburn saw the highest number of cases. As for which year, it was 2021. These will help us create an understanding of who has been affected the most or which area has been hit the hardest. In the next section, we will look at these data and discuss in detail as to what the visuals are telling us and what it could mean. 
+
+In terms of omitting any bias, I decided to include all the data to make sure the results were accurate. This however took long as loading the data was difficult at first but it eventually got faster as the more times I ran the code. In terms of bias in the data itself like age groups, neighborhoods and year, we will discuss what could have caused them. 
+
+# Data
+
+The data used in this analysis consists of the daily and cumulative incidence (confirmed cases) of COVID-19 in Toronto neighborhoods. This data covers 140 neighborhoods since the start of the pandemic, Jan, 2020 to Feb 2nd, 2022 for all confirmed and probable cases reported to and managed by Toronto Public Health, including cases that are sporadic (occurring in community) and outbreak-associated.
+
+The data analyzed in this report was obtained in csv format from the City of Toronto Open Data Portal using the @citeR package @citeopendatatoronto.
+
+Let’s take a quick look at our data.
+
+```{r, echo=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(ggpubr)
+
+#removing the spaces in column headings
+names(covid_data) <- str_replace_all(names(covid_data), c(" " = "." , "," = "" ))
+dim(covid_data) #Matrix: Number of rows and columns in our data set
+names(covid_data) #Column names in the data set 
+sapply(covid_data, function(x) length(unique(x))) #Unique rows for each column
+head(covid_data[2,3,4], 5)
+```
+
+A simple exploratory analysis of the incidence data is provided in this report.
+
+# Methodology
+
+The data set consists of over 272,000 cases, and the first thought was to create a smaller sample in order to efficiently execute the data in the statistical programming language, @citeR. For this, stratified sampling, a method that involves dividing a population into smaller groups, was taken into consideration. Each subgroup would be adequately represented within the whole sample population. In our case, the data set includes an “Age Group” category. The only thing required, now, was to preserve the proportion of “Age Groups” in our sample set. However, during a test-run of the original data, it was observed that the results were computed rather quickly than expected. As such, the idea of sampling the original data was dropped and the analysis was conducted on the entire data set.
+
+Lets get into some data visualization.
+
+# Results
+
+```{r, echo=FALSE}
+#Top Toronto Neighbourhoods case count
+nbr_ct <- data.frame(sort(table(covid_data$Neighbourhood.Name), decreasing = TRUE))
+knitr::kable(head(nbr_ct, 10), "pipe", col.name =c("Neighbourhood Name", "Number of Cases"), align = c("l", "c"))
+```
+
+Here we can look at the top 10 neighborhoods in Toronto with the most amount of cases. As seen, Woburn tops the list with 6448 cases while Islington-City Centre West is at the bottom with 4130.
+
+We now look at some more visuals that will show a detailed version of the year, month, age group that got hit the most alongwith the leading factors for the infection.
+
+```{r, echo=FALSE}
+#Create a copy of original data to add columns for Year and Year & Month
+c19_cpy <- covid_data
+c19_cpy$Yr <- format(as.Date(covid_data$Reported.Date), "%Y")
+c19_cpy$Yr_Mth <- format(as.Date(covid_data$Reported.Date), "%Y-%m")
+```
+
+Fig1 shows total cases annually below
+
+```{r, echo=FALSE}
+#Case Count by year
+ggplot(c19_cpy, aes(Yr, ..count..))+
+  geom_bar(aes(fill = Yr), alpha = 0.5)+
+  geom_text(aes(label = after_stat(count)), vjust = 0, stat = "count")+
+  labs(x = "Year", y = "Number of Cases", title = "Fig1: Annual Case Count")
+```
+
+Fig2 shows monthly numbers for each year below
+
+```{r, echo=FALSE}
+#Case Count by Months
+Yr_20 <- c19_cpy %>% 
+          filter(Yr == "2020") %>% 
+          ggplot(aes(Yr_Mth, ..count..))+
+          geom_bar(fill = "red", width = 0.5, alpha = 0.5)+
+          scale_x_discrete(labels = c("2020-01" = "Jan", "2020-02" = "Feb","2020-03" = "Mar",
+                                      "2020-04" ="Apr", "2020-05" = "May","2020-06" = "Jun",
+                                      "2020-07" = "Jul","2020-08" = "Aug","2020-09" = "Sep",
+                                      "2020-10" = "Oct","2020-11" = "Nov","2020-12" = "Dec"))  
+          labs(x = "Months", y = "Number of Cases", title = "2020 Monthly Numbers")+
+          theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+
+Yr_21 <- c19_cpy %>% 
+          filter(Yr == "2021") %>% 
+          ggplot(aes(Yr_Mth, ..count..))+
+          geom_bar(fill = "blue", width = 0.5, alpha = 0.5)+
+          scale_x_discrete(labels = c("2021-01" = "Jan", "2021-02" = "Feb","2021-03" = "Mar",
+                                      "2021-04" = "Apr","2021-05" = "May","2021-06" = "Jun",
+                                      "2021-07" = "Jul","2021-08" = "Aug","2021-09" = "Sep",
+                                      "2021-10" = "Oct","2021-11" = "Nov","2021-12" = "Dec"))
+          labs(x = "Months", y = "Number of Cases", title = "2021 Monthly Numbers")+
+          theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+
+Yr_22 <- c19_cpy %>% 
+          filter(Yr == "2022") %>% 
+          ggplot(aes(Yr_Mth, ..count..))+
+          geom_bar(fill = "green", width = 0.5, alpha = 0.5)+
+          labs(x = "Months", y = "Number of Cases", title = "2022 Monthly Numbers")+
+          theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+
+combined_plots <- ggarrange(Yr_20, Yr_21,labels = c("2020", "2021"), ncol = 2)
+annotate_figure(combined_plots, top = text_grob("Fig2: Monthly numbers by Year", color = "brown", face = "bold", size = 10))
+```
+
+Fig3 shows the case count by age groups below
+
+```{r, echo=FALSE}
+#Total case count by age groups
+ggplot(covid_data, aes(Age.Group, ..count..))+
+  geom_bar(aes(fill = Age.Group), alpha = 0.5)+
+  labs(x = "Age Groups", y = "Number of Cases", title = "Fig3: ICU Admissions by Age groups")+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+```
+
+Fig4 shows Leading factors for infections below
+
+```{r, echo=FALSE}
+#leading factors for covid infections
+ggplot(covid_data, aes(Source.of.Infection, ..count..))+
+  geom_bar(aes(fill = Source.of.Infection), alpha = 0.5)+
+  labs(x = "Sources", y = "Number of Cases", title = "Fig4: Factors leading to cases")+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))+
+  facet_wrap(~Classification)
+```
+
+# Discussion
+
+As we can see clearly, the number of cases raised rapidly in 2021, compared to 2020, mainly because of Delta and Omicron variants, first detected in early 2021, and late 2021 respectively. Both variants were identified as a “variant of concern” by WHO (World Health Organization) with both being highly contagious. Multiple testing centers were also built which caused more people to get testing done resulting in more cases reported.
+
+Fig2 depicts this issue fittingly but in terms of monthly numbers. As we can see high case numbers in the early and late months of 2021. This was again due to the reason that WHO detected more variants which saw a hike in case numbers. Toronto went into lock down after the early months which is the reason why the cases are lower. As things started to open up again during the last few months of the year, cases started to rise again.  
+
+Even though COVID-19 does not discriminate by age, the most affected age group is “20 to 29 years” with cases amassing to almost 22% of the total case count, as shown in Fig3. One reason could be that this age group is ideally young and meeting people on a constant basis due to their job requirements. Age 20 - 29 years like to travel more than the other age group as they have the time and freedom to do so. Doing this allows this particular age group to catch the symptoms more compared to someone who is young staying home for online studies or someone old staying home due to old age.  
+
+When it comes to determining the leading cause for the infections shown in Fig4, about 44% of total cases have no information. This makes it problematic to conclude a single leading factor. Having no information means that a solution cannot be deducted which makes it difficult to stop the spread. The 2nd and 3rd highest reason is Community and household contact respectively. This is rather surprising as Toronto going into lock down meant people to stay home and only leave for essential. However, this result shows people were leaving their homes and meeting others in the community who happens to spread the virus. This results in the household members to also get the virus as they are breathing the same air as them and living with each other.   
+
+# Bias
+
+In order to reduce any bias, the entire data set was utilized instead of taking a sample. However, one can expect to see unfairness when it comes to leading causes for infection, as a lot of data falls under "No information" category implying we simply do not know the reason for the confirmed case. This in turn will hinder us to reach a conclusion about the aforementioned category.
+
+Furthermore, a substantial amount of people will not always get tested at the first sign of any covid symptoms. People usually wait out a couple of days, hoping  it isn't covid and some random flu infection as the symptoms are identical. This causes a delay in the reported number of cases, or they don't get reported at all.
+
+# Conclusion
+
+In conclusion, the ethics of providing information regrading the Covid-19 cases to the public become a requirement. This paper provides the readers with a detailed information regarding which year and specifically month saw the most cases and which age group it has affected the most. It also shows the factors that could have resulted in the infection however with 44% of the data containing "No information", it is rather hard to tell. Overall, with this information, readers will be able to understand Toronto better and get an idea of which places to avoid. 
+
+\newpage
+
+
+# References
+
+
