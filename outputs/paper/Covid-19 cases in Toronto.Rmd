@@ -32,23 +32,26 @@ resources <- list_package_resources("64b54586-6180-4485-83eb-81e8fae3b8fe")
 datastore_resources <- filter(resources, tolower(format) %in% c('csv', 'geojson'))
 
 # load the first datastore resource as a sample
-covid_data <- filter(datastore_resources, row_number()==1) %>% get_resource()
-covid_data
+#covid_data <- filter(datastore_resources, row_number()==1) %>% get_resource()
+#covid_data
+covid_data <- read.csv("C:/Users/deeps/Downloads/COVID19 cases.csv")
 ```
 
 # Introduction
 
-Covid-19 is a global pandemic which started back in 2019 and has been evolving since. In order to measure the people affected by this disease, the City of Toronto has launched a data set which provides how many people have been affected and other factors such as gender, age, neighborhood etc. This data can be retrieved from @citeopendatatoronto. With the help of @citeR, I was able to create visuals using @citeggplot2 which helps the readers understand the data better. 
+Covid-19 is a global pandemic which started back in 2019 and has been evolving since. In order to measure the people affected by this disease, the City of Toronto has launched a data set which provides how many people have been affected and other factors such as gender, age, neighborhood etc. This data can be retrieved from @citeopendatatoronto. @citeR and other pakages such as @thereferencecanbewhatever, @citedplyr, @citepalmerpenguins and @citeggpubr all helped with making sure the codes ran smoothly. I was able to create visuals using @citeggplot2 which helps the readers understand the data better. @bibtex was used to help with the project as the book contained all the information needed.
 
-In this paper, we look closely at how Covid has affected in terms of age groups, neighborhoods and which year had the highest cases recorded. In terms of age group, 20-40 years saw the highest amount of cases recorded. In terms of neighborhoods, Woburn saw the highest number of cases. As for which year, it was 2021. These will help us create an understanding of who has been affected the most or which area has been hit the hardest. In the next section, we will look at these data and discuss in detail as to what the visuals are telling us and what it could mean. 
+In this paper, we look closely at how Covid has affected in terms of age groups, neighborhoods and which year had the highest cases recorded. In terms of age group, 20 to 29 years saw the highest amount of cases recorded. In terms of neighborhoods, Woburn saw the highest number of cases. As for which year, it was 2021. These will help us create an understanding of who has been affected the most or which area has been hit the hardest. In the next section, we will look at these data and discuss in detail as to what the visuals are telling us and what it could mean. 
 
-In terms of omitting any bias, I decided to include all the data to make sure the results were accurate. This however took long as loading the data was difficult at first but it eventually got faster as the more times I ran the code. In terms of bias in the data itself like age groups, neighborhoods and year, we will discuss what could have caused them. 
+In terms of omitting any bias, I decided to include all the data to make sure the results were accurate. This however took long as loading the data was difficult at first but it eventually got faster as the more times I ran the code. In terms of bias in the data itself like age groups, neighborhoods and year, we will discuss what could have caused them.
 
 # Data
 
 The data used in this analysis consists of the daily and cumulative incidence (confirmed cases) of COVID-19 in Toronto neighborhoods. This data covers 140 neighborhoods since the start of the pandemic, Jan, 2020 to Feb 2nd, 2022 for all confirmed and probable cases reported to and managed by Toronto Public Health, including cases that are sporadic (occurring in community) and outbreak-associated.
 
 The data analyzed in this report was obtained in csv format from the City of Toronto Open Data Portal using the @citeR package @citeopendatatoronto.
+
+\newpage
 
 Let’s take a quick look at our data.
 
@@ -62,16 +65,20 @@ names(covid_data) <- str_replace_all(names(covid_data), c(" " = "." , "," = "" )
 dim(covid_data) #Matrix: Number of rows and columns in our data set
 names(covid_data) #Column names in the data set 
 sapply(covid_data, function(x) length(unique(x))) #Unique rows for each column
-head(covid_data[2,3,4], 5)
+head(covid_data[c(3,4,5,7)], 5) #selected columns from the data set
 ```
+
+As seen, there are 277,473 cases recorded and 18 different colums containing key information. This includes 10 age groups, 141 neighborhoods and 9 source of infection. The data also includes other factors such as gender, ICU etc. but we will be focusing on the 3 mentioned in the above sentence.
 
 A simple exploratory analysis of the incidence data is provided in this report.
 
 # Methodology
 
-The data set consists of over 272,000 cases, and the first thought was to create a smaller sample in order to efficiently execute the data in the statistical programming language, @citeR. For this, stratified sampling, a method that involves dividing a population into smaller groups, was taken into consideration. Each subgroup would be adequately represented within the whole sample population. In our case, the data set includes an “Age Group” category. The only thing required, now, was to preserve the proportion of “Age Groups” in our sample set. However, during a test-run of the original data, it was observed that the results were computed rather quickly than expected. As such, the idea of sampling the original data was dropped and the analysis was conducted on the entire data set.
+The data set consists of over 277,000 cases, and the first thought was to create a smaller sample in order to efficiently execute the data in the statistical programming language, @citeR. For this, stratified sampling, a method that involves dividing a population into smaller groups, was taken into consideration. Each subgroup would be adequately represented within the whole sample population. In our case, the data set includes an “Age Group” category. The only thing required, now, was to preserve the proportion of “Age Groups” in our sample set. However, during a test-run of the original data, it was observed that the results were computed rather quickly than expected. As such, the idea of sampling the original data was dropped and the analysis was conducted on the entire data set.
 
 Lets get into some data visualization.
+
+\newpage
 
 # Results
 
@@ -101,10 +108,12 @@ ggplot(c19_cpy, aes(Yr, ..count..))+
   geom_text(aes(label = after_stat(count)), vjust = 0, stat = "count")+
   labs(x = "Year", y = "Number of Cases", title = "Fig1: Annual Case Count")
 ```
+\newpage
 
 Fig2 shows monthly numbers for each year below
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, results='hide'}
+
 #Case Count by Months
 Yr_20 <- c19_cpy %>% 
           filter(Yr == "2020") %>% 
@@ -138,6 +147,7 @@ Yr_22 <- c19_cpy %>%
 combined_plots <- ggarrange(Yr_20, Yr_21,labels = c("2020", "2021"), ncol = 2)
 annotate_figure(combined_plots, top = text_grob("Fig2: Monthly numbers by Year", color = "brown", face = "bold", size = 10))
 ```
+\newpage
 
 Fig3 shows the case count by age groups below
 
@@ -148,6 +158,7 @@ ggplot(covid_data, aes(Age.Group, ..count..))+
   labs(x = "Age Groups", y = "Number of Cases", title = "Fig3: ICU Admissions by Age groups")+
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 ```
+\newpage
 
 Fig4 shows Leading factors for infections below
 
@@ -178,7 +189,7 @@ Furthermore, a substantial amount of people will not always get tested at the fi
 
 # Conclusion
 
-In conclusion, the ethics of providing information regrading the Covid-19 cases to the public become a requirement. This paper provides the readers with a detailed information regarding which year and specifically month saw the most cases and which age group it has affected the most. It also shows the factors that could have resulted in the infection however with 44% of the data containing "No information", it is rather hard to tell. Overall, with this information, readers will be able to understand Toronto better and get an idea of which places to avoid. 
+In conclusion, the ethics of providing information regrading the Covid-19 cases to the public become a requirement. This paper provides the readers with a detailed information regarding which year and specifically month saw the most cases and which age group it has affected the most. It also shows the factors that could have resulted in the infection however with 44% of the data containing "No information", it is rather hard to tell. Overall, with this information, readers will be able to understand Toronto better and how the pandemic has affected the city. 
 
 \newpage
 
