@@ -155,7 +155,7 @@ Fig3 shows the case count by age groups below
 #Total case count by age groups
 ggplot(covid_data, aes(Age.Group, ..count..))+
   geom_bar(aes(fill = Age.Group), alpha = 0.5)+
-  labs(x = "Age Groups", y = "Number of Cases", title = "Fig3: ICU Admissions by Age groups")+
+  labs(x = "Age Groups", y = "Number of Cases", title = "Fig3: Covid cases by Age groups")+
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 ```
 \newpage
